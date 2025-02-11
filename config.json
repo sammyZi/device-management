@@ -1,4 +1,4 @@
 {
-  "SERVER_URL": "https://localhost:3000/api/",
+  "SERVER_URL": "https://localhost:3000/api/device-info",
   "DATA_INTERVAL_SECONDS": 10
 }
