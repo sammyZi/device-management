@@ -25,7 +25,7 @@ pip install requests
 ```
 ---
 
- #Server Configuration
+ ##Server Configuration
 The script uses a configuration file named config.json. You can specify the following values:
 
 SERVER_URL: The URL of the server where data should be sent.
