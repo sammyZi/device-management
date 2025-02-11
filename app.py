@@ -154,7 +154,7 @@ def main():
 
     while True:
         metrics = collect_metrics()
-        print("Metrics collected successfully:\n", json.dumps(metrics, indent=4))
+        #print("Metrics collected successfully:\n", json.dumps(metrics, indent=4)) remove comment if you want to see raw data in cmd
 
         print("Sending data securely to the server...")
         send_data_to_server(metrics)
