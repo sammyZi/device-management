@@ -1,0 +1,4 @@
+{
+  "SERVER_URL": "https://localhost:3000/api/",
+  "DATA_INTERVAL_SECONDS": 10
+}

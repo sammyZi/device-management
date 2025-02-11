@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Collections</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Modern UI Styling */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f7fc;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: #222831;
+      margin: 40px 0;
+      font-weight: bold; /* Make heading bold */
+    }
+
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 40px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: block;
+      color: #555;
+    }
+
+    select, button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #fafafa;
+      transition: background-color 0.3s ease;
+    }
+
+    select:focus, button:focus {
+      outline: none;
+      border-color: #005f73;
+      
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #005f73;
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #003f50;
+    }
+
+    /* Data display container */
+    .data-container {
+      margin-top: 20px;
+    }
+
+    .item {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-block {
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .data-block strong {
+      font-size: 1.1rem;
+      color: #005f73;
+    }
+
+    .data-block span {
+      font-size: 1rem;
+      color: #333;
+      white-space: pre-line;
+    }
+
+    /* Error styling */
+    .error-message {
+      color: #e74c3c;
+      font-size: 1rem;
+      text-align: center;
+      padding: 10px;
+      background-color: #f8d7da;
+      border: 1px solid #e74c3c;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+      .container {
+        width: 90%;
+      }
+
+      select, button {
+        font-size: 0.9rem;
+      }
+
+      .data-container {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Select Username to View</h1>
+
+    <label for="collectionSelect">Choose a Username:</label>
+    <select id="collectionSelect">
+      <option value="">-- Select a collection --</option>
+      <!-- Collection names will be dynamically populated -->
+    </select>
+
+    <button onclick="fetchData()">Fetch Data</button>
+
+    <div id="dataDisplay"></div>
+  </div>
+
+  <script>
+   // Fetch the config data (IP and port) from the server
+async function getConfig() {
+  try {
+    const response = await fetch('https://localhost:5000/config');
+    if (!response.ok) {
+      throw new Error('Failed to fetch configuration');
+    }
+
+    const config = await response.json();
+    return config;
+  } catch (error) {
+    console.error('Error fetching configuration:', error);
+    showError('Failed to fetch configuration');
+  }
+}
+
+// Fetch all collection names and populate the dropdown
+async function fetchCollections() {
+  try {
+    const config = await getConfig();
+    const response = await fetch(`https://${config.ip}:${config.port}/getCollections`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch collections');
+    }
+    const collections = await response.json();
+
+    const collectionSelect = document.getElementById('collectionSelect');
+    collections.forEach((collection) => {
+      const option = document.createElement('option');
+      option.value = collection;
+      option.textContent = collection;
+      collectionSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error fetching collections:', error);
+    showError('Failed to fetch collections');
+  }
+}
+
+// Function to fetch and display data from the selected collection
+async function fetchData() {
+  const selectedCollection = document.getElementById('collectionSelect').value;
+  if (!selectedCollection) {
+    showError('Please select a collection.');
+    return;
+  }
+
+  try {
+    const config = await getConfig();
+    const response = await fetch(`https://${config.ip}:${config.port}/fetchData?collection=${selectedCollection}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from ${selectedCollection}`);
+    }
+
+    const data = await response.json();
+    displayData(data);
+  } catch (error) {
+    showError(error.message);
+  }
+}
+    // Function to display the data in a user-friendly format without timestamps
+function displayData(data) {
+  const dataDisplayDiv = document.getElementById('dataDisplay');
+  dataDisplayDiv.innerHTML = '';  // Clear any existing data
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      dataDisplayDiv.innerHTML = '<p>No data found in this collection.</p>';
+    } else {
+      const container = document.createElement('div');
+      container.classList.add('data-container');
+
+      data.forEach((item) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('item');
+
+        // Loop through each key-value pair in the item
+        Object.keys(item).forEach(header => {
+          let dataContent = item[header];
+
+          // Skip fields like _id, __v or any timestamp-like fields
+          if (header !== '_id' && header !== '__v' && !isTimestamp(dataContent)) {
+            const dataBlock = document.createElement('div');
+            dataBlock.classList.add('data-block');
+
+            // Handle the object data and format it for display
+            if (typeof dataContent === 'object') {
+              if (header === 'BatteryDetails') {
+                dataContent = `Percentage: ${dataContent.Percentage}, Plugged In: ${dataContent.PluggedIn ? 'Yes' : 'No'}, Time Left: ${dataContent.TimeLeft}`;
+              } 
+              else if (header === 'CPUUsage') {
+                dataContent = `Utilization: ${dataContent.Utilization}, Speed: ${dataContent.Speed}, Up Time: ${dataContent['Up Time']}, Processes: ${dataContent.Processes}, Threads: ${dataContent.Threads}`;
+              } 
+              else if (header === 'DiskUsage') {
+                dataContent = `C:\\: Total: ${dataContent['C:\\'].Total}, Used: ${dataContent['C:\\'].Used}, Free: ${dataContent['C:\\'].Free}, Usage Percent: ${dataContent['C:\\'].UsagePercent}%, D:\\: Total: ${dataContent['D:\\'].Total}, Used: ${dataContent['D:\\'].Used}, Free: ${dataContent['D:\\'].Free}, Usage Percent: ${dataContent['D:\\'].UsagePercent}%`;
+              } 
+              else if (header === 'MemoryUsage') {
+                dataContent = `Total Memory: ${dataContent.TotalMemory}, Available Memory: ${dataContent.AvailableMemory}, Memory Usage Percent: ${dataContent.MemoryUsagePercent}%`;
+              } 
+              else if (header === 'NetworkDataUsage') {
+                dataContent = `Sent: ${dataContent.SentBytes}, Received: ${dataContent.ReceivedBytes}`;
+              } 
+              else if (header === 'TopProcesses') {
+                dataContent = dataContent.map(process => `<li>${process.Name} (PID: ${process.PID}, Memory: ${process.Memory})</li>`).join('');
+                dataContent = `<ul>${dataContent}</ul>`; // Bullet points for top processes
+              } 
+              else {
+                dataContent = 'Object data not displayed';
+              }
+            }
+
+            // Split the dataContent by commas and put each part on a new line
+            dataContent = dataContent.split(',').map(item => item.trim()).join('<br>');
+
+            dataBlock.innerHTML = `<strong>${header}:</strong> <span>${dataContent}</span>`;
+            itemDiv.appendChild(dataBlock);
+          }
+        });
+
+        container.appendChild(itemDiv);
+      });
+
+      dataDisplayDiv.appendChild(container);
+    }
+  } else {
+    dataDisplayDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;  // Display object data
+  }
+}
+
+
+    // Helper function to check if the data is a timestamp (ISO format)
+    function isTimestamp(value) {
+      // Check if the value is a string that looks like a timestamp
+      return typeof value === 'string' && !isNaN(Date.parse(value));
+    }
+
+    // Function to show error messages
+    function showError(message) {
+      const dataDisplayDiv = document.getElementById('dataDisplay');
+      dataDisplayDiv.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    // Call fetchCollections on page load to populate the dropdown
+    window.onload = fetchCollections;
+
+    // Call fetchCollections on page load to populate the dropdown
+window.onload = () => {
+  fetchCollections();
+  setInterval(fetchData, 10000); // Update data every 10 seconds
+};
+  </script>
+</body>
+</html>
