@@ -23,3 +23,16 @@ To install the required dependencies, you can use `pip`. Run the following comma
 pip install psutil
 pip install requests
 
+
+# Configuration
+The script uses a configuration file named config.json. You can specify the following values:
+
+SERVER_URL: The URL of the server where data should be sent.
+DATA_INTERVAL_SECONDS: The time interval (in seconds) between each data collection.
+By default, the script will use the following configuration:
+##
+{
+  "SERVER_URL": "https://localhost:3000/api/device-info",
+  "DATA_INTERVAL_SECONDS": 15
+}
+
