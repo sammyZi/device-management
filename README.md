@@ -22,26 +22,4 @@ To install the required dependencies, you can use `pip`. Run the following comma
 ```bash
 pip install psutil
 pip install requests
-Alternatively, if you want to set up a virtual environment and install the dependencies there:
 
-bash
-Copy
-Edit
-python -m venv venv
-source venv/bin/activate  # On Windows, use 'venv\Scripts\activate'
-pip install psutil
-pip install requests
-Configuration
-The script uses a configuration file named config.json. You can specify the following values:
-
-SERVER_URL: The URL of the server where data should be sent.
-DATA_INTERVAL_SECONDS: The time interval (in seconds) between each data collection.
-By default, the script will use the following configuration:
-
-json
-Copy
-Edit
-{
-  "SERVER_URL": "https://localhost:3000/api/device-info",
-  "DATA_INTERVAL_SECONDS": 15
-}
